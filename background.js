@@ -10,21 +10,28 @@ chrome.runtime.onInstalled.addListener(() => {
 // Listener for context menu click
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "upload-to-imagekit") {
-    let imageUrl = info.srcUrl;
-    let result = await chrome.storage.local.get('apiKey');
-    let apiKey = result.apiKey;
+    const imageUrl = info.srcUrl;
+    const result = await chrome.storage.local.get(['uploadTo', 'stageApiKey', 'productionApiKey']);
+    const { stageApiKey, productionApiKey, uploadTo } = result
 
-    if (!apiKey) {
+    if (
+      (uploadTo === "stage" && !stageApiKey) ||
+      (uploadTo === "production" && !productionApiKey)
+    ) {
       chrome.notifications.create({
         type: 'basic',
         iconUrl: 'icon48.png',
         title: 'API Key Missing',
-        message: 'Please set your API key in the extension popup.'
+        message: 'Please set your API key.'
       });
       return;
     }
 
-    const uploadEndpoint = 'https://upload.imagekit.io/api/v1/files/upload';
+    const uploadEndpoint = (
+      uploadTo === "production" ?
+      "https://upload.imagekit.io/api/v2/files/upload" :
+      "https://stage-upload.imagekit.io/api/v2/files/upload"
+    )
     const form = new FormData();
     form.append('file', imageUrl);
     form.append('fileName', imageUrl.split('/').pop());
@@ -34,7 +41,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       method: 'POST',
       headers: {
         "Accept": "application/json",
-        'Authorization': 'Basic ' + btoa(apiKey + ':')
+        'Authorization': 'Basic ' + btoa((uploadTo === "production" ? productionApiKey : stageApiKey) + ':')
       },
       body: form
     }
@@ -45,7 +52,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     .then(data => {
       chrome.notifications.create({
         type: 'basic',
-        // iconUrl: 'icon48.png',
+        iconUrl: 'icon48.png',
         title: 'Upload Successful',
         message: 'Image uploaded to ImageKit.'
       });
@@ -53,9 +60,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     .catch(error => {
       chrome.notifications.create({
         type: 'basic',
-        // iconUrl: 'icon48.png',
+        iconUrl: 'icon48.png',
         title: 'Upload Failed',
-        message: 'Failed to upload image.'
+        message: `Failed to upload image: ${error.message}`
       });
     });
   }
