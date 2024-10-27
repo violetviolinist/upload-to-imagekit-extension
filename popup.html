@@ -4,20 +4,34 @@
   <style>
     body {
       min-width: 200px;
-      min-height: 100px;
+      min-height: 200px;
       font-family: Arial, sans-serif;
       padding: 10px;
     }
-    input, button {
+    input, select {
       width: 100%;
       margin-top: 10px;
+    }
+    label {
+      margin-top: 10px;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <h3>ImageKit API Key</h3>
-  <input type="text" id="apiKeyInput" placeholder="Enter API Key" />
-  <button id="saveButton">Save</button>
+  <h3>ImageKit Settings</h3>
+
+  <label for="uploadTo">Upload to:</label>
+  <select id="uploadTo">
+    <option value="stage">Stage</option>
+    <option value="production">Production</option>
+  </select>
+
+  <label for="stageApiKey">Stage API Key:</label>
+  <input type="text" id="stageApiKey" placeholder="Enter Stage API Key" />
+
+  <label for="productionApiKey">Production API Key:</label>
+  <input type="text" id="productionApiKey" placeholder="Enter Production API Key" />
 
   <script src="popup.js"></script>
 </body>
