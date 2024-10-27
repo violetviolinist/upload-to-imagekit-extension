@@ -21,5 +21,9 @@
     "gecko": {
       "id": "jay.parekh98@gmail.com"
     }
+  },
+  "icons": {
+    "48": "icon48.png",
+    "96": "icon96.png"
   }
 }
